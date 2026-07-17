@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeroBank - Secure Digital Login</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Dark Theme (Default) */
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 25, 40, 0.65);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary-glow: #7000ff;
+            --secondary-glow: #00d2ff;
+            --text-primary: #f8f9fa;
+            --text-secondary: #94a3b8;
+            --text-glow: #00f5d4;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --input-focus-border: #00d2ff;
+            --accent-purple: #9d4edd;
+            --shadow-color: rgba(0, 0, 0, 0.37);
+            --toggle-bg: rgba(255, 255, 255, 0.08);
+            --toggle-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body.light-theme {
+            /* Light Theme */
+            --bg-color: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --card-border: rgba(0, 0, 0, 0.06);
+            --primary-glow: #8b5cf6;
+            --secondary-glow: #06b6d4;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-glow: #0ea5e9;
+            --input-bg: rgba(255, 255, 255, 0.95);
+            --input-border: rgba(0, 0, 0, 0.08);
+            --input-focus-border: #8b5cf6;
+            --accent-purple: #c084fc;
+            --shadow-color: rgba(15, 23, 42, 0.08);
+            --toggle-bg: rgba(0, 0, 0, 0.04);
+            --toggle-border: rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 20px 10px;
+            overflow-x: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* Background animated shapes */
+        .background-decorations {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .blob {
+            position: absolute;
+            width: clamp(200px, 35vw, 380px);
+            height: clamp(200px, 35vw, 380px);
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            animation: float 20s infinite alternate ease-in-out;
+            transition: background-color 0.4s ease;
+        }
+
+        .blob-1 {
+            background: var(--primary-glow);
+            top: -50px;
+            left: -50px;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            background: var(--secondary-glow);
+            bottom: -50px;
+            right: -50px;
+            animation-delay: 5s;
+        }
+
+        .blob-3 {
+            background: var(--accent-purple);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: clamp(150px, 20vw, 250px);
+            height: clamp(150px, 20vw, 250px);
+            opacity: 0.12;
+            animation: float-center 25s infinite alternate ease-in-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            50% {
+                transform: translate(80px, 40px) scale(1.15);
+            }
+            100% {
+                transform: translate(-40px, 80px) scale(0.9);
+            }
+        }
+
+        @keyframes float-center {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                transform: translate(-30%, -60%) scale(1.2);
+            }
+            100% {
+                transform: translate(-70%, -40%) scale(0.8);
+            }
+        }
+
+        /* Floating Theme Switcher */
+        .theme-switcher-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .theme-btn {
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-border);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--secondary-glow);
+            box-shadow: 0 4px 16px rgba(0, 210, 255, 0.2);
+        }
+
+        .theme-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Glassmorphic Container */
+        .login-container {
+            width: 100%;
+            max-width: 440px;
+            z-index: 10;
+            margin: auto;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: clamp(24px, 6vw, 40px) clamp(16px, 5vw, 30px);
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.05),
+                transparent
+            );
+            transform: rotate(-45deg);
+            transition: 0.5s;
+            pointer-events: none;
+        }
+
+        body.light-theme .login-card::before {
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 0, 0, 0.02),
+                transparent
+            );
+        }
+
+        .login-card:hover::before {
+            left: 100%;
+            transition: 0.7s ease-in-out;
+        }
+
+        /* Header Logo & Title */
+        .card-header {
+            text-align: center;
+            margin-bottom: clamp(20px, 5vh, 35px);
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 4px 15px rgba(112, 0, 255, 0.3);
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 4px 15px rgba(112, 0, 255, 0.2);
+            }
+            100% {
+                box-shadow: 0 4px 25px rgba(0, 210, 255, 0.5);
+            }
+        }
+
+        .logo h2 {
+            font-size: clamp(24px, 4vw, 28px);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--text-primary) 60%, var(--secondary-glow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo h2 span {
+            background: linear-gradient(135deg, var(--secondary-glow), var(--text-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: clamp(16px, 3vh, 24px);
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+            transition: color 0.3s ease;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            color: var(--text-secondary);
+            font-size: 16px;
+            transition: color 0.3s ease;
+            pointer-events: none;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px 14px 46px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .form-control:focus {
+            border-color: var(--input-focus-border);
+            background-color: var(--input-bg);
+            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.12);
+        }
+
+        .form-control:focus + .input-icon,
+        .form-group:focus-within .form-label {
+            color: var(--input-focus-border);
+        }
+
+        /* Form helpers */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: clamp(20px, 4vh, 28px);
+            font-size: 13px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        .remember-me input {
+            accent-color: var(--secondary-glow);
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            color: var(--secondary-glow);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-link:hover {
+            color: var(--text-glow);
+            text-decoration: underline;
+        }
+
+        /* Action Buttons */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-glow) 0%, var(--accent-purple) 50%, var(--secondary-glow) 100%);
+            background-size: 200% auto;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 20px rgba(112, 0, 255, 0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover {
+            background-position: right center;
+            box-shadow: 0 6px 25px rgba(0, 210, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(1px);
+        }
+
+        /* Footer section */
+        .card-footer {
+            text-align: center;
+            margin-top: clamp(20px, 4vh, 30px);
+            font-size: 14px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--card-border);
+            padding-top: 20px;
+        }
+
+        .register-link {
+            color: var(--secondary-glow);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .register-link:hover {
+            color: var(--text-glow);
+            text-decoration: underline;
+        }
+
+        /* Responsive Breakpoints & Device Adjustments */
+        @media (max-width: 480px) {
+            body {
+                align-items: flex-start;
+                padding-top: 60px;
+            }
+            .theme-switcher-container {
+                top: 10px;
+                right: 10px;
+            }
+            .login-card {
+                border-radius: 18px;
+            }
+        }
+
+        @media (max-height: 550px) {
+            body {
+                align-items: flex-start;
+                padding-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Theme Switcher Button -->
+    <div class="theme-switcher-container">
+        <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Toggle dark/light theme">
+            <i class="fa-solid fa-sun" id="themeIcon"></i>
+        </button>
+    </div>
+
+    <!-- Animated Glowing Background Blobs -->
+    <div class="background-decorations">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Login Form Wrapper -->
+    <div class="login-container">
+        <div class="login-card">
+            
+            <!-- Logo Header -->
+            <div class="card-header">
+                <div class="logo">
+                    <span class="logo-icon">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </span>
+                    <h2>Hero<span>Bank</span></h2>
+                </div>
+                <div class="subtitle">Secure Digital Portal</div>
+            </div>
+
+            <!-- Form Body -->
+            <form action="/login" method="POST">
+                
+                <!-- Phone Number Field -->
+                <div class="form-group">
+                    <label for="phoneNumber" class="form-label">Phone Number</label>
+                    <div class="input-wrapper">
+                        <input type="tel" id="phoneNumber" name="q" class="form-control" placeholder="+998 (__) ___-__-__" required autocomplete="tel">
+                        <span class="input-icon">
+                            <i class="fa-solid fa-phone"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Remember me & Forget link -->
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember">
+                        Remember this device
+                    </label>
+                    <a href="/forget" class="forgot-link">Forgot?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit">
+                    <span>Secure Sign In</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+            </form>
+
+            <!-- Card Footer Registration -->
+            <div class="card-footer">
+                Don't have an account? 
+                <a href="/register" class="register-link">Register now</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script Layer -->
+    <script>
+        // Check for saved theme preferences, default to system preference or dark mode
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'light' || (!savedTheme && !systemPrefersDark)) {
+            document.body.classList.add('light-theme');
+            updateThemeIcon(true);
+        } else {
+            updateThemeIcon(false);
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const isLightTheme = body.classList.toggle('light-theme');
+            localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
+            updateThemeIcon(isLightTheme);
+        }
+
+        function updateThemeIcon(isLight) {
+            const themeIcon = document.getElementById('themeIcon');
+            if (isLight) {
+                themeIcon.className = 'fa-solid fa-moon';
+            } else {
+                themeIcon.className = 'fa-solid fa-sun';
+            }
+        }
+    </script>
+</body>
+</html>

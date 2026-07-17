@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeroBank - Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 25, 40, 0.65);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary-glow: #7000ff;
+            --secondary-glow: #00d2ff;
+            --text-primary: #f8f9fa;
+            --text-secondary: #94a3b8;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --input-focus-border: #00d2ff;
+            --accent-purple: #9d4edd;
+            --shadow-color: rgba(0, 0, 0, 0.37);
+            --toggle-bg: rgba(255, 255, 255, 0.08);
+            --toggle-border: rgba(255, 255, 255, 0.1);
+            --success-color: #00f5d4;
+            --error-color: #ff3366;
+        }
+
+        body.light-theme {
+            --bg-color: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(0, 0, 0, 0.06);
+            --primary-glow: #8b5cf6;
+            --secondary-glow: #06b6d4;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --input-bg: rgba(255, 255, 255, 0.95);
+            --input-border: rgba(0, 0, 0, 0.08);
+            --input-focus-border: #8b5cf6;
+            --accent-purple: #c084fc;
+            --shadow-color: rgba(15, 23, 42, 0.08);
+            --toggle-bg: rgba(0, 0, 0, 0.04);
+            --toggle-border: rgba(0, 0, 0, 0.08);
+            --success-color: #10b981;
+            --error-color: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Background animated blobs */
+        .background-decorations {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .blob {
+            position: absolute;
+            width: clamp(200px, 35vw, 380px);
+            height: clamp(200px, 35vw, 380px);
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.25;
+            animation: float 20s infinite alternate ease-in-out;
+            transition: background-color 0.4s ease;
+        }
+
+        .blob-1 {
+            background: var(--primary-glow);
+            top: -50px;
+            left: -50px;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            background: var(--secondary-glow);
+            bottom: -50px;
+            right: -50px;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(80px, 40px) scale(1.15); }
+            100% { transform: translate(-40px, 80px) scale(0.9); }
+        }
+
+        /* Top Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(112, 0, 255, 0.3);
+        }
+
+        .logo h2 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo h2 span {
+            background: linear-gradient(135deg, var(--secondary-glow), var(--success-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        body.light-theme .user-badge {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .theme-btn {
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-border);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.05);
+            border-color: var(--secondary-glow);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--error-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
+        }
+
+        /* Layout Container */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+            padding: 40px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            z-index: 10;
+            flex-grow: 1;
+        }
+
+        /* Left Side: Cards Area */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, var(--primary-glow), var(--accent-purple));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(112, 0, 255, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(112, 0, 255, 0.35);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Glassmorphic Credit Card Design */
+        .credit-card {
+            height: 180px;
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .credit-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(112, 0, 255, 0.25);
+        }
+
+        .credit-card.selected {
+            border-color: var(--secondary-glow);
+            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.3), 0 15px 30px rgba(0, 210, 255, 0.2);
+        }
+
+        /* Specific Brand Gradients */
+        .card-uzcard {
+            background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+        }
+        .card-humo {
+            background: linear-gradient(135deg, #0d9488 0%, #115e59 100%);
+        }
+        .card-visa {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%);
+            border-color: rgba(217, 119, 6, 0.3);
+        }
+        .card-mastercard {
+            background: linear-gradient(135deg, #ea580c 0%, #7c2d12 100%);
+        }
+        .card-visagold {
+            background: linear-gradient(135deg, #d97706 0%, #78350f 100%);
+            border-color: rgba(254, 240, 138, 0.4);
+        }
+        .card-blocked {
+            background: linear-gradient(135deg, #475569 0%, #1e293b 100%) !important;
+            opacity: 0.7;
+        }
+
+        .card-blocked-indicator {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(239, 68, 68, 0.85);
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .card-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .card-chip {
+            width: 32px;
+            height: 24px;
+            background: linear-gradient(135deg, #ffd700, #b8860b);
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .card-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            word-spacing: 2px;
+            margin: 15px 0 5px 0;
+        }
+
+        .card-footer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 11px;
+            opacity: 0.85;
+        }
+
+        .card-holder {
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .card-expiry {
+            text-align: right;
+        }
+
+        .card-balance {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Glassmorphic Side Panels */
+        .side-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 8px 32px var(--shadow-color);
+            margin-bottom: 30px;
+        }
+
+        .panel-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.12);
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary-glow) 0%, var(--secondary-glow) 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(112, 0, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 210, 255, 0.3);
+        }
+
+        .btn-block-toggle {
+            background: transparent;
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+            width: 100%;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .btn-block-toggle:hover {
+            background: var(--error-color);
+            color: white;
+        }
+
+        /* Detail table for requisites */
+        .requisites-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .requisite-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        body.light-theme .requisite-item {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .requisite-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .requisite-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btn-toggle-eye {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-toggle-eye:hover {
+            color: var(--text-primary);
+        }
+
+        /* Create Card Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--bg-color);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 440px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* Notifications style */
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--card-border);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            font-size: 18px;
+        }
+
+        .toast-success .toast-icon { color: var(--success-color); }
+        .toast-error .toast-icon { color: var(--error-color); }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            .main-container {
+                padding: 20px;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Background blobs -->
+    <div class="background-decorations">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <a href="#" class="logo">
+            <span class="logo-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </span>
+            <h2>Hero<span>Bank</span></h2>
+        </a>
+        <div class="nav-actions">
+            <button class="theme-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                <i class="fa-solid fa-sun" id="themeIcon"></i>
+            </button>
+            <div class="user-badge">
+                <i class="fa-solid fa-user-shield"></i>
+                <span th:text="${user.phoneNumber}">+998901234567</span>
+            </div>
+            <a href="/login" class="logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-container">
+        
+        <!-- Left Column: Cards List -->
+        <section class="left-section">
+            <div class="section-header">
+                <h3 class="section-title">My Digital Cards</h3>
+                <button class="btn-create" onclick="openCreateModal()">
+                    <i class="fa-solid fa-plus"></i> Open New Card
+                </button>
+            </div>
+
+            <div class="cards-grid">
+                <!-- Loop over cards using Thymeleaf -->
+                <div th:each="card : ${cards}" 
+                     th:classappend="${card.isBlocked ? 'card-blocked' : ''} + ' ' + 
+                                     ${card.status == T(com.example.herobank.model.enums.CardStatus).Visa ? 'card-visa' : ''} + ' ' + 
+                                     ${card.status == T(com.example.herobank.model.enums.CardStatus).MasterCard ? 'card-mastercard' : ''} + ' ' + 
+                                     ${card.status == T(com.example.herobank.model.enums.CardStatus).UzCard ? 'card-uzcard' : ''} + ' ' + 
+                                     ${card.status == T(com.example.herobank.model.enums.CardStatus).Humo ? 'card-humo' : ''} + ' ' + 
+                                     ${card.status == T(com.example.herobank.model.enums.CardStatus).VisaGold ? 'card-visagold' : ''}" 
+                     class="credit-card"
+                     th:data-card-id="${card.id}"
+                     th:data-card-pan="${card.maskedPan}"
+                     th:data-card-hash="${card.panHash}"
+                     th:data-card-balance="${card.balance}"
+                     th:data-card-holder="${card.cardholderName}"
+                     th:data-card-expiry="${card.expiryDate}"
+                     th:data-card-status="${card.status}"
+                     th:data-card-blocked="${card.isBlocked}"
+                     onclick="selectCard(this)">
+                    
+                    <div class="card-blocked-indicator" th:if="${card.isBlocked}">Blocked</div>
+                    
+                    <div class="card-header-info">
+                        <span class="card-brand" th:text="${card.status}">Visa</span>
+                        <div class="card-chip"></div>
+                    </div>
+
+                    <div class="card-number" th:text="${card.maskedPan}">8600 12** **** 3456</div>
+
+                    <div class="card-footer-info">
+                        <div>
+                            <div style="font-size: 8px; opacity: 0.6; text-transform: uppercase;">Card Holder</div>
+                            <div class="card-holder" th:text="${card.cardholderName}">John Doe</div>
+                        </div>
+                        <div class="card-expiry">
+                            <div style="font-size: 8px; opacity: 0.6; text-transform: uppercase;">Expiry</div>
+                            <div th:text="${#temporals.format(card.expiryDate, 'MM/yy')}">12/29</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Info Block -->
+            <div class="side-card" style="background: rgba(112, 0, 255, 0.05); border-color: rgba(112, 0, 255, 0.1);">
+                <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; margin-bottom: 10px;">
+                    <i class="fa-solid fa-lightbulb" style="color: var(--secondary-glow)"></i> Quick Banking Tip
+                </h4>
+                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                    Never share your card PIN or CVV code with anyone. HeroBank support will never ask for your passwords or credentials via telegram or phone. Keep your credentials secure.
+                </p>
+            </div>
+        </section>
+
+        <!-- Right Column: Settings & Transfer -->
+        <section class="right-section">
+            
+            <!-- Requisites & settings panel -->
+            <div class="side-card" id="requisitesPanel" style="display: none;">
+                <h3 class="panel-title">
+                    <i class="fa-solid fa-gears" style="color: var(--secondary-glow)"></i> Card Management
+                </h3>
+                
+                <div class="requisites-grid">
+                    <div class="requisite-item">
+                        <div class="requisite-label">Balance</div>
+                        <div class="requisite-value" id="reqBalance">0.00 UZS</div>
+                    </div>
+                    <div class="requisite-item">
+                        <div class="requisite-label">Type</div>
+                        <div class="requisite-value" id="reqType">-</div>
+                    </div>
+                    <div class="requisite-item" style="grid-column: span 2;">
+                        <div class="requisite-label">Card Number</div>
+                        <div class="requisite-value" id="reqPan">-</div>
+                    </div>
+                    <div class="requisite-item">
+                        <div class="requisite-label">PIN Code</div>
+                        <div class="requisite-value">
+                            <span id="reqPin" data-real-pin="••••">••••</span>
+                            <button class="btn-toggle-eye" onclick="toggleRequisiteVisibility('reqPin')">
+                                <i class="fa-solid fa-eye" id="reqPinIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="requisite-item">
+                        <div class="requisite-label">CVV</div>
+                        <div class="requisite-value">
+                            <span id="reqCvv" data-real-cvv="•••">•••</span>
+                            <button class="btn-toggle-eye" onclick="toggleRequisiteVisibility('reqCvv')">
+                                <i class="fa-solid fa-eye" id="reqCvvIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PIN change form -->
+                <div style="border-top: 1px solid var(--card-border); padding-top: 20px; margin-top: 20px;">
+                    <h4 style="font-size: 14px; margin-bottom: 12px;">Change PIN Code</h4>
+                    <div class="form-group">
+                        <input type="password" id="oldPinInput" class="form-control" placeholder="Old 4-digit PIN" maxlength="4">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="newPinInput" class="form-control" placeholder="New 4-digit PIN" maxlength="4">
+                    </div>
+                    <button class="btn-action" onclick="submitChangePin()" style="padding: 10px;">
+                        Update PIN
+                    </button>
+                </div>
+
+                <!-- Block / Unblock card button -->
+                <button class="btn-block-toggle" id="blockToggleBtn" onclick="toggleBlockStatus()">
+                    Block Card
+                </button>
+            </div>
+            
+            <!-- Transfer Panel -->
+            <div class="side-card">
+                <h3 class="panel-title">
+                    <i class="fa-solid fa-money-bill-transfer" style="color: var(--secondary-glow)"></i> Send Money Transfer
+                </h3>
+                <div class="form-group">
+                    <label class="form-label" for="fromCardSelect">Choose Source Card</label>
+                    <select id="fromCardSelect" class="form-control" style="background-color: var(--input-bg);">
+                        <option value="" disabled selected>Select sender card...</option>
+                        <option th:each="card : ${cards}" 
+                                th:if="${!card.isBlocked}"
+                                th:value="${card.panHash}" 
+                                th:text="${card.status} + ' - ' + ${card.maskedPan} + ' (' + ${card.balance} + ')'">
+                            UzCard - 8600...
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="toPanInput">Destination Card Number (PAN)</label>
+                    <input type="text" id="toPanInput" class="form-control" placeholder="8600 1234 5678 9012" maxlength="19">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="transferAmount">Amount</label>
+                    <input type="number" id="transferAmount" class="form-control" placeholder="Enter amount">
+                </div>
+                <button class="btn-action" id="transferBtn" onclick="executeTransfer()">
+                    <span>Send Transfer</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Create Card Modal Overlay -->
+    <div class="modal-overlay" id="createCardModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="section-title">Open Digital Card</h3>
+                <button class="modal-close" onclick="closeCreateModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newCardStatus">Card Type</label>
+                <select id="newCardStatus" class="form-control">
+                    <option value="UzCard">UzCard</option>
+                    <option value="Humo">Humo</option>
+                    <option value="Visa">Visa</option>
+                    <option value="MasterCard">MasterCard</option>
+                    <option value="VisaGold">Visa Gold</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newCardDeposit">Initial Deposit</label>
+                <input type="number" id="newCardDeposit" class="form-control" value="100000" placeholder="Minimum 10000">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="newCardPin">Choose PIN Code (Optional)</label>
+                <input type="password" id="newCardPin" class="form-control" placeholder="4-digit PIN" maxlength="4">
+            </div>
+            <button class="btn-action" onclick="submitCreateCard()">
+                Open Card
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification structure -->
+    <div class="toast-notification" id="toast">
+        <i class="fa-solid fa-circle-check toast-icon"></i>
+        <span id="toastMessage">Success message</span>
+    </div>
+
+    <script th:inline="javascript">
+        // Inject current user ID from thymeleaf safely
+        const currentUserId = [[$user:id]];
+
+        // Selected card state
+        let selectedCardElement = null;
+
+        // Theme management
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'light' || (!savedTheme && !systemPrefersDark)) {
+            document.body.classList.add('light-theme');
+            updateThemeIcon(true);
+        } else {
+            updateThemeIcon(false);
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const isLightTheme = body.classList.toggle('light-theme');
+            localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
+            updateThemeIcon(isLightTheme);
+        }
+
+        function updateThemeIcon(isLight) {
+            const themeIcon = document.getElementById('themeIcon');
+            if (isLight) {
+                themeIcon.className = 'fa-solid fa-moon';
+            } else {
+                themeIcon.className = 'fa-solid fa-sun';
+            }
+        }
+
+        // Notification Helper
+        function showNotification(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.className = 'toast-notification ' + (isError ? 'toast-error' : 'toast-success');
+            toastMessage.textContent = message;
+            
+            const icon = toast.querySelector('.toast-icon');
+            if (isError) {
+                icon.className = 'fa-solid fa-triangle-exclamation toast-icon';
+            } else {
+                icon.className = 'fa-solid fa-circle-check toast-icon';
+            }
+            
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // Card Selection Handler
+        function selectCard(element) {
+            // Remove selection class from previous
+            if (selectedCardElement) {
+                selectedCardElement.classList.remove('selected');
+            }
+            
+            selectedCardElement = element;
+            selectedCardElement.classList.add('selected');
+            
+            const cardId = element.getAttribute('data-card-id');
+            const maskedPan = element.getAttribute('data-card-pan');
+            const balance = element.getAttribute('data-card-balance');
+            const type = element.getAttribute('data-card-status');
+            const isBlocked = element.getAttribute('data-card-blocked') === 'true';
+
+            // Show settings panel
+            document.getElementById('requisitesPanel').style.display = 'block';
+            
+            // Populate requisites
+            document.getElementById('reqPan').textContent = maskedPan;
+            document.getElementById('reqBalance').textContent = parseFloat(balance).toLocaleString() + ' ' + (type.includes('Visa') || type.includes('Master') ? 'USD' : 'UZS');
+            document.getElementById('reqType').textContent = type;
+            
+            // Set block button text
+            const blockBtn = document.getElementById('blockToggleBtn');
+            if (isBlocked) {
+                blockBtn.textContent = 'Unblock Card';
+                blockBtn.style.borderColor = 'var(--success-color)';
+                blockBtn.style.color = 'var(--success-color)';
+                blockBtn.onmouseover = () => {
+                    blockBtn.style.backgroundColor = 'var(--success-color)';
+                    blockBtn.style.color = 'white';
+                };
+                blockBtn.onmouseout = () => {
+                    blockBtn.style.backgroundColor = 'transparent';
+                    blockBtn.style.color = 'var(--success-color)';
+                };
+            } else {
+                blockBtn.textContent = 'Block Card';
+                blockBtn.style.borderColor = 'var(--error-color)';
+                blockBtn.style.color = 'var(--error-color)';
+                blockBtn.onmouseover = () => {
+                    blockBtn.style.backgroundColor = 'var(--error-color)';
+                    blockBtn.style.color = 'white';
+                };
+                blockBtn.onmouseout = () => {
+                    blockBtn.style.backgroundColor = 'transparent';
+                    blockBtn.style.color = 'var(--error-color)';
+                };
+            }
+
+            // Hide actual values initially
+            document.getElementById('reqPin').textContent = '••••';
+            document.getElementById('reqCvv').textContent = '•••';
+            document.getElementById('reqPinIcon').className = 'fa-solid fa-eye';
+            document.getElementById('reqCvvIcon').className = 'fa-solid fa-eye';
+            
+            // Fetch secure properties via API
+            fetch(`/api/cards/${cardId}/settings/requisites`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('reqPin').setAttribute('data-real-pin', data.pin);
+                    document.getElementById('reqCvv').setAttribute('data-real-cvv', data.cvv);
+                })
+                .catch(() => {
+                    showNotification("Failed to fetch secure card requisites", true);
+                });
+        }
+
+        // Toggle PIN/CVV display
+        function toggleRequisiteVisibility(id) {
+            const field = document.getElementById(id);
+            const icon = document.getElementById(id + 'Icon');
+            const isPin = id === 'reqPin';
+            const realVal = field.getAttribute(isPin ? 'data-real-pin' : 'data-real-cvv');
+            
+            if (field.textContent.includes('•')) {
+                field.textContent = realVal;
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                field.textContent = isPin ? '••••' : '•••';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        // Create Card Modal
+        function openCreateModal() {
+            document.getElementById('createCardModal').classList.add('show');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createCardModal').classList.remove('show');
+        }
+
+        function submitCreateCard() {
+            const status = document.getElementById('newCardStatus').value;
+            const deposit = document.getElementById('newCardDeposit').value;
+            const pin = document.getElementById('newCardPin').value;
+            
+            if (!deposit || parseFloat(deposit) < 10000) {
+                showNotification("Minimum initial deposit must be 10,000 UZS/USD", true);
+                return;
+            }
+
+            const url = `/api/cards?userId=${currentUserId}&status=${status}&initialDeposit=${deposit}&pin=${pin}`;
+
+            fetch(url, {
+                method: 'POST'
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Card creation failed");
+                return res.json();
+            })
+            .then(card => {
+                showNotification("New card opened successfully!");
+                closeCreateModal();
+                setTimeout(() => location.reload(), 1500);
+            })
+            .catch(err => {
+                showNotification(err.message, true);
+            });
+        }
+
+        // Update PIN Submit
+        function submitChangePin() {
+            if (!selectedCardElement) return;
+            const cardId = selectedCardElement.getAttribute('data-card-id');
+            const oldPin = document.getElementById('oldPinInput').value;
+            const newPin = document.getElementById('newPinInput').value;
+
+            if (oldPin.length !== 4 || newPin.length !== 4) {
+                showNotification("PIN codes must be exactly 4 digits", true);
+                return;
+            }
+
+            fetch(`/api/cards/${cardId}/settings/pin?oldPin=${oldPin}&newPin=${newPin}`, {
+                method: 'PUT'
+            })
+            .then(res => {
+                if (!res.ok) return res.json().then(e => { throw new Error(e.message || "Failed to update PIN") });
+                return res.json();
+            })
+            .then(() => {
+                showNotification("PIN code updated successfully!");
+                document.getElementById('oldPinInput').value = '';
+                document.getElementById('newPinInput').value = '';
+                selectCard(selectedCardElement);
+            })
+            .catch(err => {
+                showNotification(err.message, true);
+            });
+        }
+
+        // Block / Unblock Toggle
+        function toggleBlockStatus() {
+            if (!selectedCardElement) return;
+            const cardId = selectedCardElement.getAttribute('data-card-id');
+            const isBlocked = selectedCardElement.getAttribute('data-card-blocked') === 'true';
+
+            fetch(`/api/cards/${cardId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ blocked: !isBlocked })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to change card status");
+                return res.json();
+            })
+            .then(() => {
+                showNotification(isBlocked ? "Card unblocked successfully!" : "Card blocked successfully!");
+                setTimeout(() => location.reload(), 1500);
+            })
+            .catch(err => {
+                showNotification(err.message, true);
+            });
+        }
+
+        // Execute Money Transfer
+        function executeTransfer() {
+            const fromHash = document.getElementById('fromCardSelect').value;
+            const toPan = document.getElementById('toPanInput').value;
+            const amount = document.getElementById('transferAmount').value;
+
+            if (!fromHash) {
+                showNotification("Please select a source card", true);
+                return;
+            }
+            if (!toPan || toPan.length < 16) {
+                showNotification("Please enter a valid destination card number", true);
+                return;
+            }
+            if (!amount || parseFloat(amount) <= 0) {
+                showNotification("Please enter a valid transfer amount", true);
+                return;
+            }
+
+            const transferBtn = document.getElementById('transferBtn');
+            transferBtn.disabled = true;
+            transferBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+            fetch(`/api/cards/transfer?fromPanHash=${fromHash}&toPan=${toPan}&amount=${amount}`, {
+                method: 'POST'
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Transfer failed. Please check balance and card numbers.");
+                showNotification("Money transfer sent successfully!");
+                setTimeout(() => location.reload(), 1500);
+            })
+            .catch(err => {
+                showNotification(err.message, true);
+                transferBtn.disabled = false;
+                transferBtn.innerHTML = '<span>Send Transfer</span> <i class="fa-solid fa-arrow-right"></i>';
+            });
+        }
+    </script>
+</body>
+</html>

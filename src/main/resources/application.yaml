@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: HeroBank
+  graphql:
+    graphiql:
+      enabled: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: 12345
+    url: jdbc:postgresql://localhost:5432/bank
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+server:
+  port: 8080

@@ -1,0 +1,55 @@
+type Query {
+    getUserById(id: ID!): User
+    getUserByPhone(phoneNumber: String!): User
+    getAllUsers: [User!]!
+}
+
+type User {
+    id: ID!
+    phoneNumber: String!
+    passport: Passport
+    status: Status
+    device: [Device!]
+    cards: [Card!]
+}
+
+type Passport {
+    series: String!
+    firstname: String
+    lastname: String
+    surname: String
+    birthdate: String
+    issue_date: String
+    expiry_date: String
+}
+
+type Card {
+    id: ID!
+    maskedPan: String!
+    panHash: String!
+    cardholderName: String!
+    balance: Float!
+    expiryDate: String!
+    status: CardStatus!
+    isBlocked: Boolean!
+}
+
+type Device {
+    id: ID!
+    deviceModel: String
+    deviceToken: String
+}
+
+enum Status {
+    Client
+    Worker
+    Maneger
+}
+
+enum CardStatus {
+    Visa
+    MasterCard
+    UzCard
+    Humo
+    VisaGold
+}
